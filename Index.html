@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png">
+
+    <title>Recharge & Consommation</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+
+  <body>
+    <h1>Journal de recharge</h1>
+
+    <table id="monTableau">
+      <tr>
+        <th>Témoin de suppression</th>
+        <th>Date & Heure</th>
+        <th>Type de recharge</th>
+        <th>Consommation (Wh)</th>
+        <th>Kilométrage (km)</th>
+        <th>Enregistré</th>
+      </tr>
+    </table>
+
+
+    <button id="ajouter">Ajouter une ligne</button>
+    <button id="enregistrer">Enregistrer</button>
+    <button id="toggleCheck">Tout cocher / Tout décocher</button>
+    <button id="supprimer">Supprimer les lignes cochées</button>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBb67-ZsSRWFXxxzEqILmxo-ujhy2VfSyc",
+    authDomain: "recharges-tm3.firebaseapp.com",
+    databaseURL: "https://recharges-tm3-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "recharges-tm3",
+    storageBucket: "recharges-tm3.firebasestorage.app",
+    messagingSenderId: "1091245845968",
+    appId: "1:1091245845968:web:e1896209c398d5adf0ddd5"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
+
+
+
+
+    <script src="script.js"></script>
+  </body>
+</html>

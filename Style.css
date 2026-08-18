@@ -1,0 +1,158 @@
+/* ------------------------------
+   STYLE GLOBAL — APP MOBILE
+--------------------------------*/
+body {
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+/* ------------------------------
+   TABLEAU MODERNE
+--------------------------------*/
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+th {
+  background: #4a6cf7;
+  color: white;
+  padding: 12px;
+  font-size: 14px;
+  text-align: left;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+/* Alternance des lignes */
+tr:nth-child(even) td {
+  background: #fafafa;
+}
+
+/* ------------------------------
+   CASE À COCHER MODERNE
+--------------------------------*/
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #4a6cf7;
+  cursor: pointer;
+}
+
+/* ------------------------------
+   SELECT MODERNE
+--------------------------------*/
+select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+select:hover {
+  border-color: #4a6cf7;
+}
+
+/* ------------------------------
+   INPUT TEXTE LIBRE
+--------------------------------*/
+input[type="text"] {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+input[type="text"]:focus {
+  border-color: #4a6cf7;
+  outline: none;
+}
+
+/* ------------------------------
+   BOUTONS MODERNES
+--------------------------------*/
+button {
+  background: #4a6cf7;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  margin: 10px 5px;
+  transition: 0.2s;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+button:hover {
+  background: #3a56d4;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* Bouton supprimer — rouge */
+#supprimer {
+  background: #e74c3c;
+}
+
+#supprimer:hover {
+  background: #c0392b;
+}
+
+/* ------------------------------
+   RESPONSIVE — MODE MOBILE
+--------------------------------*/
+@media (max-width: 700px) {
+  table, tr, td, th {
+    display: block;
+  }
+
+  tr {
+    margin-bottom: 15px;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  }
+
+  th {
+    display: none;
+  }
+
+  td {
+    border: none;
+    padding: 8px 0;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #4a6cf7;
+    display: block;
+    margin-bottom: 4px;
+  }
+}
