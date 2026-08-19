@@ -65,6 +65,52 @@ function verifierCoherenceKilometrage() {
   }
 }
 
+/* 📊 GRAPHIQUE KM */
+let graphKm = null;
+
+function mettreAJourGraphique() {
+  const labels = [];
+  const dataKm = [];
+
+  for (let i = 1; i < tableau.rows.length; i++) {
+    const cells = tableau.rows[i].cells;
+
+    const dateISO = cells[1].dataset.iso;
+    const km = Number(cells[4].textContent.replace(/\s/g, ""));
+
+    labels.push(formatDateAffichage(dateISO));
+    dataKm.push(km);
+  }
+
+  const ctx = document.getElementById("graphKm").getContext("2d");
+
+  if (graphKm) graphKm.destroy();
+
+  graphKm = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Kilométrage (km)",
+        data: dataKm,
+        borderColor: "#4a6cf7",
+        backgroundColor: "rgba(74,108,247,0.15)",
+        borderWidth: 3,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: "#4a6cf7"
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { title: { display: true, text: "Date & Heure" } },
+        y: { title: { display: true, text: "Kilométrage (km)" } }
+      }
+    }
+  });
+}
+
 // 🔄 2️⃣ Charger les données depuis Firebase
 db.ref("journal").on("value", snapshot => {
   const lignes = snapshot.val();
@@ -73,7 +119,10 @@ db.ref("journal").on("value", snapshot => {
     tableau.deleteRow(1);
   }
 
-  if (!lignes) return;
+  if (!lignes) {
+    mettreAJourGraphique();
+    return;
+  }
 
   for (let ligne of lignes) {
     const row = tableau.insertRow();
@@ -162,6 +211,7 @@ db.ref("journal").on("value", snapshot => {
   }
 
   verifierCoherenceKilometrage();
+  mettreAJourGraphique();
 });
 
 // ➕ 3️⃣ Ajouter une ligne
@@ -225,6 +275,7 @@ boutonEnregistrer.addEventListener("click", () => {
   db.ref("journal").set(lignes);
 
   verifierCoherenceKilometrage();
+  mettreAJourGraphique();
 
   alert("Données enregistrées dans le cloud !");
 });
@@ -262,7 +313,6 @@ boutonSupprimer.addEventListener("click", () => {
 boutonToggleCheck.addEventListener("click", () => {
   let auMoinsUneDecochee = false;
 
-  // Vérifier si au moins une case est décochée
   for (let i = 1; i < tableau.rows.length; i++) {
     const checkbox = tableau.rows[i].cells[0].querySelector("input");
     if (!checkbox.checked) {
@@ -271,14 +321,11 @@ boutonToggleCheck.addEventListener("click", () => {
     }
   }
 
-  // Si au moins une est décochée → tout cocher
-  // Sinon → tout décocher
   for (let i = 1; i < tableau.rows.length; i++) {
     const checkbox = tableau.rows[i].cells[0].querySelector("input");
     checkbox.checked = auMoinsUneDecochee;
   }
 
-  // Mise à jour du texte du bouton
   boutonToggleCheck.textContent = auMoinsUneDecochee
     ? "Tout décocher"
     : "Tout cocher";
