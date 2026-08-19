@@ -330,3 +330,61 @@ boutonToggleCheck.addEventListener("click", () => {
     ? "Tout décocher"
     : "Tout cocher";
 });
+
+/* 📤 EXPORT CSV */
+document.getElementById("exportCSV").addEventListener("click", () => {
+  let lignesCSV = [];
+  
+  // En-têtes
+  lignesCSV.push([
+    "checked",
+    "dateISO",
+    "type",
+    "conso",
+    "km",
+    "flag"
+  ].join(";"));
+
+  // Parcours du tableau
+  for (let i = 1; i < tableau.rows.length; i++) {
+    const cells = tableau.rows[i].cells;
+
+    const checked = cells[0].querySelector("input").checked ? "1" : "0";
+    const dateFR = cells[1].textContent.trim();
+    const dateISO = convertirDateFRversISO(dateFR);
+
+    const select = cells[2].querySelector("select");
+    const inputLibre = cells[2].querySelector("input");
+
+    let typeRecharge = select.value;
+    if (select.value === "Autre (texte libre)" && inputLibre.value.trim() !== "") {
+      typeRecharge = inputLibre.value.trim();
+    }
+
+    const conso = nettoyerNombre(cells[3].textContent);
+    const km = nettoyerNombre(cells[4].textContent);
+    const flag = cells[5].querySelector("select").value;
+
+    lignesCSV.push([
+      checked,
+      dateISO,
+      typeRecharge,
+      conso,
+      km,
+      flag
+    ].join(";"));
+  }
+
+  // Création du fichier CSV
+  const contenu = lignesCSV.join("\n");
+  const blob = new Blob([contenu], { type: "text/csv;charset=utf-8;" });
+
+  // Téléchargement
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "journal.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
