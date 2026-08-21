@@ -14,7 +14,7 @@ function nettoyerNombre(n) {
   return n.replace(/\s/g, "");
 }
 
-// Convertir une date FR → ISO
+// Convertir une date FR → ISO (avec secondes)
 function convertirDateFRversISO(dateFR) {
   const [date, heure] = dateFR.split(" ");
   const [jour, mois, annee] = date.split("/");
@@ -75,19 +75,21 @@ function mettreAJourGraphique() {
     const cells = tableau.rows[i].cells;
 
     const dateISO = cells[1].dataset.iso;
-    if (!dateISO || isNaN(new Date(dateISO))) continue;
+    if (!dateISO) continue;
+
+    const d = new Date(dateISO);
+    if (isNaN(d.getTime())) continue;
 
     const km = Number(cells[4].textContent.replace(/\s/g, ""));
 
-    points.push({
-      x: new Date(dateISO),
-      y: km
-    });
+    points.push({ x: d, y: km });
   }
 
   const ctx = document.getElementById("graphKm").getContext("2d");
 
   if (graphKm) graphKm.destroy();
+
+  if (points.length === 0) return;
 
   graphKm = new Chart(ctx, {
     type: "line",
@@ -109,6 +111,8 @@ function mettreAJourGraphique() {
       scales: {
         x: {
           type: "time",
+          min: points[0].x,
+          max: points[points.length - 1].x,
           time: {
             tooltipFormat: "dd/MM/yyyy HH:mm",
             displayFormats: {
