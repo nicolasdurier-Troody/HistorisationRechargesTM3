@@ -1,7 +1,11 @@
-/* ============================================================
-   UTILITAIRES
-   ============================================================ */
+// 1️⃣ Définir les éléments AVANT Firebase
+const tableau = document.getElementById("monTableau");
+const bouton = document.getElementById("ajouter");
+const boutonEnregistrer = document.getElementById("enregistrer");
+const boutonSupprimer = document.getElementById("supprimer");
+const boutonToggleCheck = document.getElementById("toggleCheck");
 
+// 🔢 Fonctions de formatage
 function formatNombre(n) {
   return Number(n).toLocaleString("fr-FR");
 }
@@ -10,74 +14,85 @@ function nettoyerNombre(n) {
   return n.replace(/\s/g, "");
 }
 
+// Convertir une date FR → ISO
 function convertirDateFRversISO(dateFR) {
   const [date, heure] = dateFR.split(" ");
-  if (!date || !heure) return null;
-
   const [jour, mois, annee] = date.split("/");
-  if (!jour || !mois || !annee) return null;
-
-  // Normalisation
-  const j = jour.padStart(2, "0");
-  const m = mois.padStart(2, "0");
-  const a = annee.length === 2 ? "20" + annee : annee;
-
-  const iso = `${a}-${m}-${j}T${heure}:00`;
-  const d = new Date(iso);
-
-  return isNaN(d.getTime()) ? null : iso;
+  return `${annee}-${mois}-${jour}T${heure}`;
 }
 
-
+// Convertir ISO → FR
 function formatDateAffichage(dateISO) {
   const d = new Date(dateISO);
-  if (isNaN(d.getTime())) return "";
   return d.toLocaleDateString("fr-FR") + " " + d.toLocaleTimeString("fr-FR");
 }
 
-/* ============================================================
-   ELEMENTS DOM
-   ============================================================ */
-
-const tableau = document.getElementById("monTableau");
-const boutonAjouter = document.getElementById("ajouter");
-const boutonEnregistrer = document.getElementById("enregistrer");
-const boutonSupprimer = document.getElementById("supprimer");
-const boutonToggleCheck = document.getElementById("toggleCheck");
-
-/* ============================================================
-   GRAPHIQUE
-   ============================================================ */
-
-let graphKm = null;
-
-function mettreAJourGraphique() {
-  const points = [];
+// 🔍 Vérification de cohérence kilométrique
+function verifierCoherenceKilometrage() {
+  const lignes = [];
 
   for (let i = 1; i < tableau.rows.length; i++) {
     const cells = tableau.rows[i].cells;
 
-    const iso = cells[1].dataset.iso;
-    if (!iso) continue;
-
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) continue;
-
+    const dateISO = cells[1].dataset.iso;
+    const date = new Date(dateISO);
     const km = Number(cells[4].textContent.replace(/\s/g, ""));
-    points.push({ x: d, y: km });
+
+    lignes.push({
+      index: i,
+      date: date,
+      km: km
+    });
+  }
+
+  for (let i = 0; i < lignes.length; i++) {
+    const ligneA = lignes[i];
+    let incoherent = false;
+
+    for (let j = 0; j < lignes.length; j++) {
+      if (i === j) continue;
+
+      const ligneB = lignes[j];
+
+      if (ligneB.date < ligneA.date && ligneB.km > ligneA.km) {
+        incoherent = true;
+        break;
+      }
+    }
+
+    const row = tableau.rows[ligneA.index];
+    row.style.backgroundColor = incoherent ? "#ffdddd" : "";
+  }
+}
+
+/* 📊 GRAPHIQUE KM */
+let graphKm = null;
+
+function mettreAJourGraphique() {
+  const labels = [];
+  const dataKm = [];
+
+  for (let i = 1; i < tableau.rows.length; i++) {
+    const cells = tableau.rows[i].cells;
+
+    const dateISO = cells[1].dataset.iso;
+    const km = Number(cells[4].textContent.replace(/\s/g, ""));
+
+    labels.push(formatDateAffichage(dateISO));
+    dataKm.push(km);
   }
 
   const ctx = document.getElementById("graphKm").getContext("2d");
 
   if (graphKm) graphKm.destroy();
-  if (points.length === 0) return;
 
   graphKm = new Chart(ctx, {
     type: "line",
     data: {
+      labels: labels,
       datasets: [{
         label: "Kilométrage (km)",
-        data: points,
+        data: dataKm,
         borderColor: "#4a6cf7",
         backgroundColor: "rgba(74,108,247,0.15)",
         borderWidth: 3,
@@ -88,43 +103,15 @@ function mettreAJourGraphique() {
     },
     options: {
       responsive: true,
-      parsing: false,
       scales: {
-        x: {
-          type: "time",
-          min: points[0].x,
-          max: points[points.length - 1].x,
-          time: {
-            tooltipFormat: "dd/MM/yyyy HH:mm",
-            displayFormats: {
-              hour: "dd/MM HH:mm",
-              day: "dd/MM",
-              month: "MM/yyyy"
-            }
-          }
-        },
-        y: {
-          title: { display: true, text: "Kilométrage (km)" }
-        }
+        x: { title: { display: true, text: "Date & Heure" } },
+        y: { title: { display: true, text: "Kilométrage (km)" } }
       }
     }
   });
 }
 
-/* ============================================================
-   VALIDATION DU COÛT
-   ============================================================ */
-
-function validerCout(cell) {
-  const valeur = cell.textContent.trim().replace(",", ".");
-  const estNombre = !isNaN(valeur) && valeur !== "";
-  cell.style.color = estNombre ? "#333" : "red";
-}
-
-/* ============================================================
-   CHARGEMENT FIREBASE
-   ============================================================ */
-
+// 🔄 2️⃣ Charger les données depuis Firebase
 db.ref("journal").on("value", snapshot => {
   const lignes = snapshot.val();
 
@@ -140,29 +127,30 @@ db.ref("journal").on("value", snapshot => {
   for (let ligne of lignes) {
     const row = tableau.insertRow();
 
-    /* Colonne 1 : suppression */
+    // Colonne 1 : Témoin de suppression
     const c0 = row.insertCell();
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = ligne.checked === true;
     c0.appendChild(checkbox);
 
-    /* Colonne 2 : date */
+    // Colonne 2 : Date & Heure (modifiable)
     const c1 = row.insertCell();
-    c1.dataset.iso = ligne.dateISO;
     c1.textContent = formatDateAffichage(ligne.dateISO);
+    c1.dataset.iso = ligne.dateISO;
     c1.contentEditable = true;
 
-    /* Colonne 3 : type recharge */
+    // Colonne 3 : Type de recharge
     const c2 = row.insertCell();
+
     const select = document.createElement("select");
     const options = ["Maison", "Travail", "Borne public", "Supercharger", "Autre (texte libre)"];
 
     for (let opt of options) {
-      const o = document.createElement("option");
-      o.value = opt;
-      o.textContent = opt;
-      select.appendChild(o);
+      const option = document.createElement("option");
+      option.value = opt;
+      option.textContent = opt;
+      select.appendChild(option);
     }
 
     const inputLibre = document.createElement("input");
@@ -180,69 +168,77 @@ db.ref("journal").on("value", snapshot => {
     }
 
     select.addEventListener("change", () => {
-      inputLibre.style.display = select.value === "Autre (texte libre)" ? "inline-block" : "none";
-      if (select.value !== "Autre (texte libre)") inputLibre.value = "";
+      if (select.value === "Autre (texte libre)") {
+        inputLibre.style.display = "inline-block";
+      } else {
+        inputLibre.style.display = "none";
+        inputLibre.value = "";
+      }
     });
 
     c2.appendChild(select);
     c2.appendChild(inputLibre);
 
-    /* Colonne 4 : conso */
+    // Colonne 4 : Consommation
     const c3 = row.insertCell();
     c3.textContent = formatNombre(ligne.conso);
     c3.contentEditable = true;
 
-    /* Colonne 5 : km */
+    // Colonne 5 : Kilométrage
     const c4 = row.insertCell();
     c4.textContent = formatNombre(ligne.km);
     c4.contentEditable = true;
 
-    /* Colonne 6 : coût */
+    // Colonne 6 : Enregistré
     const c5 = row.insertCell();
-    c5.textContent = ligne.cout ? formatNombre(ligne.cout) : "";
-    c5.dataset.type = "cout";
-    c5.contentEditable = true;
-    validerCout(c5);
 
-    /* Colonne 7 : flag */
-    const c6 = row.insertCell();
     const selectFlag = document.createElement("select");
-    selectFlag.innerHTML = `<option value="❌">❌</option><option value="✔️">✔️</option>`;
+
+    const opt1 = document.createElement("option");
+    opt1.value = "❌";
+    opt1.textContent = "❌";
+
+    const opt2 = document.createElement("option");
+    opt2.value = "✔️";
+    opt2.textContent = "✔️";
+
+    selectFlag.appendChild(opt1);
+    selectFlag.appendChild(opt2);
+
     selectFlag.value = ligne.flag || "❌";
-    c6.appendChild(selectFlag);
+
+    c5.appendChild(selectFlag);
   }
 
+  verifierCoherenceKilometrage();
   mettreAJourGraphique();
 });
 
-/* ============================================================
-   AJOUTER UNE LIGNE
-   ============================================================ */
+// ➕ 3️⃣ Ajouter une ligne
+function ajouterLigne() {
+  const maintenantISO = new Date().toISOString();
 
-boutonAjouter.addEventListener("click", () => {
-  const nouvelle = {
+  const nouvelleLigne = {
     checked: false,
-    dateISO: new Date().toISOString(),
+    dateISO: maintenantISO,
     type: "Maison",
     conso: "0",
     km: "0",
-    cout: "0",
     flag: "❌"
   };
 
-  db.ref("journal").once("value", snap => {
-    const data = snap.val() || [];
-    data.push(nouvelle);
+  db.ref("journal").once("value", snapshot => {
+    const data = snapshot.val() || [];
+    data.push(nouvelleLigne);
     db.ref("journal").set(data);
   });
-});
+}
 
-/* ============================================================
-   ENREGISTRER
-   ============================================================ */
+bouton.addEventListener("click", ajouterLigne);
 
+// 💾 4️⃣ Enregistrer toutes les lignes (tri par date ISO)
 boutonEnregistrer.addEventListener("click", () => {
-  const lignes = [];
+  let lignes = [];
 
   for (let i = 1; i < tableau.rows.length; i++) {
     const cells = tableau.rows[i].cells;
@@ -250,95 +246,112 @@ boutonEnregistrer.addEventListener("click", () => {
     const checkbox = cells[0].querySelector("input");
 
     const dateFR = cells[1].textContent.trim();
-    const iso = convertirDateFRversISO(dateFR);
-    if (!iso) {
-        alert("Format de date invalide : " + dateFR);
-        return;
-      }
+    const dateISO = convertirDateFRversISO(dateFR);
 
     const select = cells[2].querySelector("select");
     const inputLibre = cells[2].querySelector("input");
 
     let typeRecharge = select.value;
+
     if (select.value === "Autre (texte libre)" && inputLibre.value.trim() !== "") {
       typeRecharge = inputLibre.value.trim();
     }
 
-    const selectFlag = cells[6].querySelector("select");
+    const selectFlag = cells[5].querySelector("select");
 
     lignes.push({
       checked: checkbox.checked,
-      dateISO: iso,
+      dateISO: dateISO,
       type: typeRecharge,
       conso: nettoyerNombre(cells[3].textContent),
       km: nettoyerNombre(cells[4].textContent),
-      cout: nettoyerNombre(cells[5].textContent),
       flag: selectFlag.value
     });
   }
 
+  // TRI PAR DATE ISO
   lignes.sort((a, b) => new Date(a.dateISO) - new Date(b.dateISO));
 
   db.ref("journal").set(lignes);
 
+  verifierCoherenceKilometrage();
   mettreAJourGraphique();
+
+  alert("Données enregistrées dans le cloud !");
 });
 
-/* ============================================================
-   SUPPRIMER
-   ============================================================ */
-
+// 🗑️ 5️⃣ Supprimer les lignes cochées
 boutonSupprimer.addEventListener("click", () => {
-  if (!confirm("Supprimer les lignes cochées ?")) return;
 
-  db.ref("journal").once("value", snap => {
-    const data = snap.val() || [];
+  const confirmation = confirm("Supprimer les lignes cochées ?\n\nRépondre : Oui / Non");
 
-    const indices = [];
+  if (!confirmation) {
+    alert("Suppression annulée.");
+    return;
+  }
+
+  db.ref("journal").once("value", snapshot => {
+    const data = snapshot.val() || [];
+
+    const lignesCochees = [];
     for (let i = 1; i < tableau.rows.length; i++) {
       const checkbox = tableau.rows[i].cells[0].querySelector("input");
-      if (checkbox.checked) indices.push(i - 1);
+      if (checkbox.checked) {
+        lignesCochees.push(i - 1);
+      }
     }
 
-    const nouvelles = data.filter((_, idx) => !indices.includes(idx));
-    db.ref("journal").set(nouvelles);
+    const nouvellesDonnees = data.filter((ligne, index) => !lignesCochees.includes(index));
+
+    db.ref("journal").set(nouvellesDonnees);
+
+    alert("Lignes supprimées !");
   });
 });
 
-/* ============================================================
-   COCHER / DÉCOCHER TOUT
-   ============================================================ */
-
+// 🆕 Bouton : Cocher / Décocher toutes les cases de la première colonne
 boutonToggleCheck.addEventListener("click", () => {
   let auMoinsUneDecochee = false;
 
   for (let i = 1; i < tableau.rows.length; i++) {
-    if (!tableau.rows[i].cells[0].querySelector("input").checked) {
+    const checkbox = tableau.rows[i].cells[0].querySelector("input");
+    if (!checkbox.checked) {
       auMoinsUneDecochee = true;
       break;
     }
   }
 
   for (let i = 1; i < tableau.rows.length; i++) {
-    tableau.rows[i].cells[0].querySelector("input").checked = auMoinsUneDecochee;
+    const checkbox = tableau.rows[i].cells[0].querySelector("input");
+    checkbox.checked = auMoinsUneDecochee;
   }
+
+  boutonToggleCheck.textContent = auMoinsUneDecochee
+    ? "Tout décocher"
+    : "Tout cocher";
 });
 
-/* ============================================================
-   EXPORT CSV
-   ============================================================ */
-
+/* 📤 EXPORT CSV */
 document.getElementById("exportCSV").addEventListener("click", () => {
   let lignesCSV = [];
+  
+  // En-têtes
+  lignesCSV.push([
+    "checked",
+    "dateISO",
+    "type",
+    "conso",
+    "km",
+    "flag"
+  ].join(";"));
 
-  lignesCSV.push("checked;dateISO;type;conso;km;cout;flag");
-
+  // Parcours du tableau
   for (let i = 1; i < tableau.rows.length; i++) {
     const cells = tableau.rows[i].cells;
 
     const checked = cells[0].querySelector("input").checked ? "1" : "0";
-    const iso = convertirDateFRversISO(cells[1].textContent.trim());
-    if (!iso) continue;
+    const dateFR = cells[1].textContent.trim();
+    const dateISO = convertirDateFRversISO(dateFR);
 
     const select = cells[2].querySelector("select");
     const inputLibre = cells[2].querySelector("input");
@@ -350,80 +363,28 @@ document.getElementById("exportCSV").addEventListener("click", () => {
 
     const conso = nettoyerNombre(cells[3].textContent);
     const km = nettoyerNombre(cells[4].textContent);
-    const cout = nettoyerNombre(cells[5].textContent);
-    const flag = cells[6].querySelector("select").value;
+    const flag = cells[5].querySelector("select").value;
 
-    lignesCSV.push([checked, iso, typeRecharge, conso, km, cout, flag].join(";"));
+    lignesCSV.push([
+      checked,
+      dateISO,
+      typeRecharge,
+      conso,
+      km,
+      flag
+    ].join(";"));
   }
 
-  const blob = new Blob([lignesCSV.join("\n")], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
+  // Création du fichier CSV
+  const contenu = lignesCSV.join("\n");
+  const blob = new Blob([contenu], { type: "text/csv;charset=utf-8;" });
 
+  // Téléchargement
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = "journal.csv";
   a.click();
-
   URL.revokeObjectURL(url);
 });
 
-/* ============================================================
-   CORRECTION DES DATES ÉDITÉES
-   ============================================================ */
-
-tableau.addEventListener("input", (e) => {
-  const cell = e.target;
-
-  // Si on modifie la colonne Date & Heure
-  if (cell.cellIndex === 1) {
-    const iso = convertirDateFRversISO(cell.textContent.trim());
-
-    if (!iso) {
-      cell.style.color = "red";   // indique une erreur
-      return;                     // empêche la disparition de la date
-    }
-
-    cell.dataset.iso = iso;               // date ISO pour le graphique
-    cell.textContent = formatDateAffichage(iso); // date FR lisible
-    cell.style.color = "#333";
-  }
-
-  // Si on modifie la colonne coût
-  if (cell.dataset.type === "cout") {
-    validerCout(cell);
-  }
-});
-
-
-/* ============================================================
-   RÉGLAGE MANUEL DES ÉCHELLES
-   ============================================================ */
-
-document.getElementById("applyScale").addEventListener("click", () => {
-  if (!graphKm) return;
-
-  const xmin = document.getElementById("scaleXmin").value.trim();
-  const xmax = document.getElementById("scaleXmax").value.trim();
-  const ymin = document.getElementById("scaleYmin").value.trim();
-  const ymax = document.getElementById("scaleYmax").value.trim();
-
-  const xMinDate = xmin ? new Date(xmin) : null;
-  const xMaxDate = xmax ? new Date(xmax) : null;
-
-  if (xmin && isNaN(xMinDate.getTime())) {
-    alert("Min X n'est pas une date ISO valide.");
-    return;
-  }
-  if (xmax && isNaN(xMaxDate.getTime())) {
-    alert("Max X n'est pas une date ISO valide.");
-    return;
-  }
-
-  graphKm.options.scales.x.min = xmin ? xMinDate : undefined;
-  graphKm.options.scales.x.max = xmax ? xMaxDate : undefined;
-
-  graphKm.options.scales.y.min = ymin ? Number(ymin) : undefined;
-  graphKm.options.scales.y.max = ymax ? Number(ymax) : undefined;
-
-  graphKm.update();
-});
