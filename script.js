@@ -69,18 +69,22 @@ function verifierCoherenceKilometrage() {
 let graphKm = null;
 
 function mettreAJourGraphique() {
-  const labels = [];
-  const dataKm = [];
+  const points = [];
 
   for (let i = 1; i < tableau.rows.length; i++) {
     const cells = tableau.rows[i].cells;
 
     const dateISO = cells[1].dataset.iso;
     const km = Number(cells[4].textContent.replace(/\s/g, ""));
+    const timestamp = new Date(dateISO).getTime();
 
-    labels.push(formatDateAffichage(dateISO));
-    dataKm.push(km);
+    if (!isNaN(timestamp)) {
+      points.push({ x: timestamp, y: km });
+    }
   }
+
+  // Tri par date croissante pour un tracé cohérent
+  points.sort((a, b) => a.x - b.x);
 
   const ctx = document.getElementById("graphKm").getContext("2d");
 
@@ -89,10 +93,9 @@ function mettreAJourGraphique() {
   graphKm = new Chart(ctx, {
     type: "line",
     data: {
-      labels: labels,
       datasets: [{
         label: "Kilométrage (km)",
-        data: dataKm,
+        data: points,
         borderColor: "#4a6cf7",
         backgroundColor: "rgba(74,108,247,0.15)",
         borderWidth: 3,
@@ -103,9 +106,28 @@ function mettreAJourGraphique() {
     },
     options: {
       responsive: true,
+      parsing: false, // les données sont déjà au format {x, y}
       scales: {
-        x: { title: { display: true, text: "Date & Heure" } },
+        x: {
+          type: "linear", // échelle numérique réelle (comme un graphique XY Excel)
+          title: { display: true, text: "Date & Heure" },
+          ticks: {
+            callback: function (value) {
+              return formatDateAffichage(new Date(value).toISOString());
+            }
+          }
+        },
         y: { title: { display: true, text: "Kilométrage (km)" } }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            title: function (items) {
+              const value = items[0].parsed.x;
+              return formatDateAffichage(new Date(value).toISOString());
+            }
+          }
+        }
       }
     }
   });
@@ -387,4 +409,3 @@ document.getElementById("exportCSV").addEventListener("click", () => {
   a.click();
   URL.revokeObjectURL(url);
 });
-
