@@ -434,3 +434,34 @@ tableau.addEventListener("input", (e) => {
     validerCout(cell);
   }
 });
+// 🎚 Réglage manuel des échelles du graphique
+document.getElementById("applyScale").addEventListener("click", () => {
+  if (!graphKm) return;
+
+  const xmin = document.getElementById("scaleXmin").value.trim();
+  const xmax = document.getElementById("scaleXmax").value.trim();
+  const ymin = document.getElementById("scaleYmin").value.trim();
+  const ymax = document.getElementById("scaleYmax").value.trim();
+
+  // Sécurisation des dates ISO
+  const xMinDate = xmin ? new Date(xmin) : null;
+  const xMaxDate = xmax ? new Date(xmax) : null;
+
+  if (xmin && isNaN(xMinDate.getTime())) {
+    alert("Min X n'est pas une date ISO valide.");
+    return;
+  }
+  if (xmax && isNaN(xMaxDate.getTime())) {
+    alert("Max X n'est pas une date ISO valide.");
+    return;
+  }
+
+  // Application des échelles
+  graphKm.options.scales.x.min = xmin ? xMinDate : undefined;
+  graphKm.options.scales.x.max = xmax ? xMaxDate : undefined;
+
+  graphKm.options.scales.y.min = ymin ? Number(ymin) : undefined;
+  graphKm.options.scales.y.max = ymax ? Number(ymax) : undefined;
+
+  graphKm.update();
+});
