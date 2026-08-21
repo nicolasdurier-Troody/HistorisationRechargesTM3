@@ -18,7 +18,7 @@ function nettoyerNombre(n) {
 function convertirDateFRversISO(dateFR) {
   const [date, heure] = dateFR.split(" ");
   const [jour, mois, annee] = date.split("/");
-  return `${annee}-${mois}-${jour}T${heure}`;
+  return `${annee}-${mois}-${jour}T${heure}:00`;
 }
 
 // Convertir ISO → FR
@@ -75,6 +75,8 @@ function mettreAJourGraphique() {
     const cells = tableau.rows[i].cells;
 
     const dateISO = cells[1].dataset.iso;
+    if (!dateISO || isNaN(new Date(dateISO))) continue;
+
     const km = Number(cells[4].textContent.replace(/\s/g, ""));
 
     points.push({
