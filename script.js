@@ -17,11 +17,17 @@ function convertirDateFRversISO(dateFR) {
   const [jour, mois, annee] = date.split("/");
   if (!jour || !mois || !annee) return null;
 
-  const iso = `${annee}-${mois}-${jour}T${heure}:00`;
+  // Normalisation
+  const j = jour.padStart(2, "0");
+  const m = mois.padStart(2, "0");
+  const a = annee.length === 2 ? "20" + annee : annee;
+
+  const iso = `${a}-${m}-${j}T${heure}:00`;
   const d = new Date(iso);
 
   return isNaN(d.getTime()) ? null : iso;
 }
+
 
 function formatDateAffichage(dateISO) {
   const d = new Date(dateISO);
