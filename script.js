@@ -251,7 +251,10 @@ boutonEnregistrer.addEventListener("click", () => {
 
     const dateFR = cells[1].textContent.trim();
     const iso = convertirDateFRversISO(dateFR);
-    if (!iso) continue;
+    if (!iso) {
+        alert("Format de date invalide : " + dateFR);
+        return;
+      }
 
     const select = cells[2].querySelector("select");
     const inputLibre = cells[2].querySelector("input");
@@ -371,21 +374,26 @@ document.getElementById("exportCSV").addEventListener("click", () => {
 tableau.addEventListener("input", (e) => {
   const cell = e.target;
 
+  // Si on modifie la colonne Date & Heure
   if (cell.cellIndex === 1) {
     const iso = convertirDateFRversISO(cell.textContent.trim());
+
     if (!iso) {
-      cell.style.color = "red";
-      return;
+      cell.style.color = "red";   // indique une erreur
+      return;                     // empêche la disparition de la date
     }
-    cell.dataset.iso = iso;
-    cell.textContent = formatDateAffichage(iso);
+
+    cell.dataset.iso = iso;               // date ISO pour le graphique
+    cell.textContent = formatDateAffichage(iso); // date FR lisible
     cell.style.color = "#333";
   }
 
+  // Si on modifie la colonne coût
   if (cell.dataset.type === "cout") {
     validerCout(cell);
   }
 });
+
 
 /* ============================================================
    RÉGLAGE MANUEL DES ÉCHELLES
