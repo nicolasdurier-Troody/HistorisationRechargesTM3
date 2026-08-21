@@ -33,6 +33,29 @@
     <h2 style="text-align:center;margin-top:30px;">Évolution du kilométrage</h2>
     <canvas id="graphKm" style="width:100%;max-width:900px;margin:auto;"></canvas>
 
+    <div style="max-width:900px;margin:20px auto;text-align:center;">
+      <h3>Réglage manuel des échelles</h3>
+    
+      <label>Min X (ISO) :</label>
+      <input id="scaleXmin" type="text" placeholder="2024-01-01T00:00:00">
+    
+      <label>Max X (ISO) :</label>
+      <input id="scaleXmax" type="text" placeholder="2024-12-31T23:59:59">
+    
+      <br><br>
+    
+      <label>Min Y (km) :</label>
+      <input id="scaleYmin" type="number" placeholder="0">
+    
+      <label>Max Y (km) :</label>
+      <input id="scaleYmax" type="number" placeholder="50000">
+    
+      <br><br>
+    
+      <button id="applyScale">Appliquer les échelles</button>
+    </div>
+
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
