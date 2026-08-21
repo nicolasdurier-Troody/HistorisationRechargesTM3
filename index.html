@@ -18,7 +18,6 @@
         <th>Type de recharge</th>
         <th>Consommation (Wh)</th>
         <th>Kilométrage (km)</th>
-        <th>Coût (€)</th>
         <th>Enregistré</th>
       </tr>
     </table>
@@ -29,57 +28,31 @@
     <button id="supprimer">Supprimer les lignes cochées</button>
     <button id="exportCSV" style="background:#2ecc71;">Exporter en CSV</button>
 
+
     <!-- 📊 CANVAS DU GRAPHIQUE -->
     <h2 style="text-align:center;margin-top:30px;">Évolution du kilométrage</h2>
     <canvas id="graphKm" style="width:100%;max-width:900px;margin:auto;"></canvas>
 
-    <div style="max-width:900px;margin:20px auto;text-align:center;">
-      <h3>Réglage manuel des échelles</h3>
-    
-      <label>Min X (ISO) :</label>
-      <input id="scaleXmin" type="text" placeholder="2024-01-01T00:00:00">
-    
-      <label>Max X (ISO) :</label>
-      <input id="scaleXmax" type="text" placeholder="2024-12-31T23:59:59">
-    
-      <br><br>
-    
-      <label>Min Y (km) :</label>
-      <input id="scaleYmin" type="number" placeholder="0">
-    
-      <label>Max Y (km) :</label>
-      <input id="scaleYmax" type="number" placeholder="50000">
-    
-      <br><br>
-    
-      <button id="applyScale">Appliquer les échelles</button>
-    </div>
-
-
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Adaptateur obligatoire pour l’axe temporel -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyBb67-ZsSRWFXxxzEqILmxo-ujhy2VfSyc",
-        authDomain: "recharges-tm3.firebaseapp.com",
-        databaseURL: "https://recharges-tm3-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "recharges-tm3",
-        storageBucket: "recharges-tm3.firebasestorage.app",
-        messagingSenderId: "1091245845968",
-        appId: "1:1091245845968:web:e1896209c398d5adf0ddd5"
-      };
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBb67-ZsSRWFXxxzEqILmxo-ujhy2VfSyc",
+    authDomain: "recharges-tm3.firebaseapp.com",
+    databaseURL: "https://recharges-tm3-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "recharges-tm3",
+    storageBucket: "recharges-tm3.firebasestorage.app",
+    messagingSenderId: "1091245845968",
+    appId: "1:1091245845968:web:e1896209c398d5adf0ddd5"
+  };
 
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.database();
-    </script>
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
 
     <script src="script.js"></script>
   </body>
