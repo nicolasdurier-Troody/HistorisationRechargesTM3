@@ -69,8 +69,7 @@ function verifierCoherenceKilometrage() {
 let graphKm = null;
 
 function mettreAJourGraphique() {
-  const labels = [];
-  const dataKm = [];
+  const points = [];
 
   for (let i = 1; i < tableau.rows.length; i++) {
     const cells = tableau.rows[i].cells;
@@ -78,8 +77,10 @@ function mettreAJourGraphique() {
     const dateISO = cells[1].dataset.iso;
     const km = Number(cells[4].textContent.replace(/\s/g, ""));
 
-    labels.push(formatDateAffichage(dateISO));
-    dataKm.push(km);
+    points.push({
+      x: new Date(dateISO),
+      y: km
+    });
   }
 
   const ctx = document.getElementById("graphKm").getContext("2d");
@@ -89,10 +90,9 @@ function mettreAJourGraphique() {
   graphKm = new Chart(ctx, {
     type: "line",
     data: {
-      labels: labels,
       datasets: [{
         label: "Kilométrage (km)",
-        data: dataKm,
+        data: points,
         borderColor: "#4a6cf7",
         backgroundColor: "rgba(74,108,247,0.15)",
         borderWidth: 3,
@@ -103,12 +103,33 @@ function mettreAJourGraphique() {
     },
     options: {
       responsive: true,
+      parsing: false,
       scales: {
-        x: { title: { display: true, text: "Date & Heure" } },
-        y: { title: { display: true, text: "Kilométrage (km)" } }
+        x: {
+          type: "time",
+          time: {
+            tooltipFormat: "dd/MM/yyyy HH:mm",
+            displayFormats: {
+              hour: "dd/MM HH:mm",
+              day: "dd/MM",
+              month: "MM/yyyy"
+            }
+          },
+          title: { display: true, text: "Date & Heure" }
+        },
+        y: {
+          title: { display: true, text: "Kilométrage (km)" }
+        }
       }
     }
   });
+}
+
+// 🔄 Validation du coût
+function validerCout(cell) {
+  const valeur = cell.textContent.trim().replace(",", ".");
+  const estNombre = !isNaN(valeur) && valeur !== "";
+  cell.style.color = estNombre ? "#333" : "red";
 }
 
 // 🔄 2️⃣ Charger les données depuis Firebase
@@ -189,8 +210,15 @@ db.ref("journal").on("value", snapshot => {
     c4.textContent = formatNombre(ligne.km);
     c4.contentEditable = true;
 
-    // Colonne 6 : Enregistré
+    // Colonne 6 : Coût
     const c5 = row.insertCell();
+    c5.textContent = ligne.cout ? formatNombre(ligne.cout) : "";
+    c5.contentEditable = true;
+    c5.dataset.type = "cout";
+    validerCout(c5);
+
+    // Colonne 7 : Enregistré
+    const c6 = row.insertCell();
 
     const selectFlag = document.createElement("select");
 
@@ -207,7 +235,7 @@ db.ref("journal").on("value", snapshot => {
 
     selectFlag.value = ligne.flag || "❌";
 
-    c5.appendChild(selectFlag);
+    c6.appendChild(selectFlag);
   }
 
   verifierCoherenceKilometrage();
@@ -224,6 +252,7 @@ function ajouterLigne() {
     type: "Maison",
     conso: "0",
     km: "0",
+    cout: "0",
     flag: "❌"
   };
 
@@ -257,7 +286,7 @@ boutonEnregistrer.addEventListener("click", () => {
       typeRecharge = inputLibre.value.trim();
     }
 
-    const selectFlag = cells[5].querySelector("select");
+    const selectFlag = cells[6].querySelector("select");
 
     lignes.push({
       checked: checkbox.checked,
@@ -265,6 +294,7 @@ boutonEnregistrer.addEventListener("click", () => {
       type: typeRecharge,
       conso: nettoyerNombre(cells[3].textContent),
       km: nettoyerNombre(cells[4].textContent),
+      cout: nettoyerNombre(cells[5].textContent),
       flag: selectFlag.value
     });
   }
@@ -342,6 +372,7 @@ document.getElementById("exportCSV").addEventListener("click", () => {
     "type",
     "conso",
     "km",
+    "cout",
     "flag"
   ].join(";"));
 
@@ -363,7 +394,8 @@ document.getElementById("exportCSV").addEventListener("click", () => {
 
     const conso = nettoyerNombre(cells[3].textContent);
     const km = nettoyerNombre(cells[4].textContent);
-    const flag = cells[5].querySelector("select").value;
+    const cout = nettoyerNombre(cells[5].textContent);
+    const flag = cells[6].querySelector("select").value;
 
     lignesCSV.push([
       checked,
@@ -371,6 +403,7 @@ document.getElementById("exportCSV").addEventListener("click", () => {
       typeRecharge,
       conso,
       km,
+      cout,
       flag
     ].join(";"));
   }
@@ -388,3 +421,10 @@ document.getElementById("exportCSV").addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
+// 🖊 Validation en temps réel du coût
+tableau.addEventListener("input", (e) => {
+  const cell = e.target;
+  if (cell.dataset && cell.dataset.type === "cout") {
+    validerCout(cell);
+  }
+});
