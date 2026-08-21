@@ -29,7 +29,16 @@ function nettoyerDecimal(n) {
   return isNaN(nombre) ? "0.00" : nombre.toFixed(2);
 }
 
-// Convertir une date FR → ISO
+// Formate un timestamp au format "jj/mm/aa hh:mm"
+function formatDateAxe(timestamp) {
+  const d = new Date(timestamp);
+  const jour = String(d.getDate()).padStart(2, "0");
+  const mois = String(d.getMonth() + 1).padStart(2, "0");
+  const annee = String(d.getFullYear()).slice(-2);
+  const heures = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${jour}/${mois}/${annee} ${heures}:${minutes}`;
+}
 function convertirDateFRversISO(dateFR) {
   const [date, heure] = dateFR.split(" ");
   const [jour, mois, annee] = date.split("/");
@@ -125,12 +134,23 @@ function mettreAJourGraphique() {
       scales: {
         x: {
           type: "time", // échelle temporelle réelle (espacement proportionnel au temps écoulé)
-          time: {
-            tooltipFormat: "dd/MM/yyyy HH:mm"
+          ticks: {
+            callback: function (value) {
+              return formatDateAxe(value);
+            }
           },
           title: { display: true, text: "Date & Heure" }
         },
         y: { title: { display: true, text: "Kilométrage (km)" } }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            title: function (items) {
+              return formatDateAxe(items[0].parsed.x);
+            }
+          }
+        }
       }
     }
   });
