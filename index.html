@@ -18,6 +18,7 @@
         <th>Type de recharge</th>
         <th>Consommation (Wh)</th>
         <th>Kilométrage (km)</th>
+        <th>Coût (€)</th>
         <th>Enregistré</th>
       </tr>
     </table>
@@ -27,7 +28,6 @@
     <button id="toggleCheck">Tout cocher / Tout décocher</button>
     <button id="supprimer">Supprimer les lignes cochées</button>
     <button id="exportCSV" style="background:#2ecc71;">Exporter en CSV</button>
-
 
     <!-- 📊 CANVAS DU GRAPHIQUE -->
     <h2 style="text-align:center;margin-top:30px;">Évolution du kilométrage</h2>
@@ -39,20 +39,20 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBb67-ZsSRWFXxxzEqILmxo-ujhy2VfSyc",
-    authDomain: "recharges-tm3.firebaseapp.com",
-    databaseURL: "https://recharges-tm3-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "recharges-tm3",
-    storageBucket: "recharges-tm3.firebasestorage.app",
-    messagingSenderId: "1091245845968",
-    appId: "1:1091245845968:web:e1896209c398d5adf0ddd5"
-  };
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyBb67-ZsSRWFXxxzEqILmxo-ujhy2VfSyc",
+        authDomain: "recharges-tm3.firebaseapp.com",
+        databaseURL: "https://recharges-tm3-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "recharges-tm3",
+        storageBucket: "recharges-tm3.firebasestorage.app",
+        messagingSenderId: "1091245845968",
+        appId: "1:1091245845968:web:e1896209c398d5adf0ddd5"
+      };
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-</script>
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+    </script>
 
     <script src="script.js"></script>
   </body>
