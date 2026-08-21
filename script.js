@@ -14,6 +14,21 @@ function nettoyerNombre(n) {
   return n.replace(/\s/g, "");
 }
 
+// Formatage décimal (ex: coûts) en écriture française : "12,50"
+function formatDecimal(n) {
+  return Number(n).toLocaleString("fr-FR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+// Nettoyage d'un nombre décimal saisi en "0,00" -> nombre standard "0.00"
+function nettoyerDecimal(n) {
+  const valeur = n.replace(/\s/g, "").replace(",", ".");
+  const nombre = Number(valeur);
+  return isNaN(nombre) ? "0.00" : nombre.toFixed(2);
+}
+
 // Convertir une date FR → ISO
 function convertirDateFRversISO(dateFR) {
   const [date, heure] = dateFR.split(" ");
@@ -36,7 +51,7 @@ function verifierCoherenceKilometrage() {
 
     const dateISO = cells[1].dataset.iso;
     const date = new Date(dateISO);
-    const km = Number(cells[4].textContent.replace(/\s/g, ""));
+    const km = Number(cells[5].textContent.replace(/\s/g, ""));
 
     lignes.push({
       index: i,
@@ -75,7 +90,7 @@ function mettreAJourGraphique() {
     const cells = tableau.rows[i].cells;
 
     const dateISO = cells[1].dataset.iso;
-    const km = Number(cells[4].textContent.replace(/\s/g, ""));
+    const km = Number(cells[5].textContent.replace(/\s/g, ""));
     const timestamp = new Date(dateISO).getTime();
 
     if (!isNaN(timestamp)) {
@@ -109,25 +124,13 @@ function mettreAJourGraphique() {
       parsing: false, // les données sont déjà au format {x, y}
       scales: {
         x: {
-          type: "linear", // échelle numérique réelle (comme un graphique XY Excel)
-          title: { display: true, text: "Date & Heure" },
-          ticks: {
-            callback: function (value) {
-              return formatDateAffichage(new Date(value).toISOString());
-            }
-          }
+          type: "time", // échelle temporelle réelle (espacement proportionnel au temps écoulé)
+          time: {
+            tooltipFormat: "dd/MM/yyyy HH:mm"
+          },
+          title: { display: true, text: "Date & Heure" }
         },
         y: { title: { display: true, text: "Kilométrage (km)" } }
-      },
-      plugins: {
-        tooltip: {
-          callbacks: {
-            title: function (items) {
-              const value = items[0].parsed.x;
-              return formatDateAffichage(new Date(value).toISOString());
-            }
-          }
-        }
       }
     }
   });
@@ -206,12 +209,17 @@ db.ref("journal").on("value", snapshot => {
     c3.textContent = formatNombre(ligne.conso);
     c3.contentEditable = true;
 
-    // Colonne 5 : Kilométrage
+    // Colonne 5 : Coûts (décimal, format "0,00")
+    const cCout = row.insertCell();
+    cCout.textContent = formatDecimal(ligne.cout || 0);
+    cCout.contentEditable = true;
+
+    // Colonne 6 : Kilométrage
     const c4 = row.insertCell();
     c4.textContent = formatNombre(ligne.km);
     c4.contentEditable = true;
 
-    // Colonne 6 : Enregistré
+    // Colonne 7 : Enregistré
     const c5 = row.insertCell();
 
     const selectFlag = document.createElement("select");
@@ -245,6 +253,7 @@ function ajouterLigne() {
     dateISO: maintenantISO,
     type: "Maison",
     conso: "0",
+    cout: "0.00",
     km: "0",
     flag: "❌"
   };
@@ -279,14 +288,15 @@ boutonEnregistrer.addEventListener("click", () => {
       typeRecharge = inputLibre.value.trim();
     }
 
-    const selectFlag = cells[5].querySelector("select");
+    const selectFlag = cells[6].querySelector("select");
 
     lignes.push({
       checked: checkbox.checked,
       dateISO: dateISO,
       type: typeRecharge,
       conso: nettoyerNombre(cells[3].textContent),
-      km: nettoyerNombre(cells[4].textContent),
+      cout: nettoyerDecimal(cells[4].textContent),
+      km: nettoyerNombre(cells[5].textContent),
       flag: selectFlag.value
     });
   }
@@ -363,6 +373,7 @@ document.getElementById("exportCSV").addEventListener("click", () => {
     "dateISO",
     "type",
     "conso",
+    "cout",
     "km",
     "flag"
   ].join(";"));
@@ -384,14 +395,16 @@ document.getElementById("exportCSV").addEventListener("click", () => {
     }
 
     const conso = nettoyerNombre(cells[3].textContent);
-    const km = nettoyerNombre(cells[4].textContent);
-    const flag = cells[5].querySelector("select").value;
+    const cout = nettoyerDecimal(cells[4].textContent);
+    const km = nettoyerNombre(cells[5].textContent);
+    const flag = cells[6].querySelector("select").value;
 
     lignesCSV.push([
       checked,
       dateISO,
       typeRecharge,
       conso,
+      cout,
       km,
       flag
     ].join(";"));
