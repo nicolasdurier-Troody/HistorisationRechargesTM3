@@ -465,3 +465,33 @@ document.getElementById("applyScale").addEventListener("click", () => {
 
   graphKm.update();
 });
+// 🕒 Correction : rendre les dates lisibles dans le tableau après édition
+tableau.addEventListener("input", (e) => {
+  const cell = e.target;
+
+  // On ne traite que la colonne Date & Heure
+  if (cell.cellIndex === 1) {
+    const texteFR = cell.textContent.trim();
+
+    // Vérification rapide du format FR
+    if (!texteFR.includes("/") || !texteFR.includes(" ")) return;
+
+    // Conversion FR → ISO
+    const iso = convertirDateFRversISO(texteFR);
+
+    // Vérification ISO valide
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) {
+      cell.style.color = "red";
+      return;
+    }
+
+    // Mise à jour du dataset pour le graphique
+    cell.dataset.iso = iso;
+
+    // Réaffichage propre en FR
+    cell.textContent = formatDateAffichage(iso);
+
+    cell.style.color = "#333";
+  }
+});
