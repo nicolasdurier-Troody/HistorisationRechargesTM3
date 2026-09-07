@@ -1,62 +1,763 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
   <head>
     <meta charset="UTF-8">
     <link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" href="apple-touch-icon.png">
     <title>Recharge & Consommation</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+/* ------------------------------
+   STYLE GLOBAL — APP MOBILE
+--------------------------------*/
+body {
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+h2 {
+  text-align: center;
+  margin-top: 30px;
+}
+
+/* ------------------------------
+   BARRE UTILISATEUR (haut)
+--------------------------------*/
+#barreUtilisateur {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-radius: 10px;
+  padding: 10px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+#barreUtilisateur .info {
+  color: #555;
+}
+
+#btnLogout {
+  background: #95a5a6;
+  padding: 8px 14px;
+  font-size: 13px;
+  margin: 0;
+  box-shadow: none;
+}
+
+#btnLogout:hover { background: #7f8c8d; }
+
+/* ------------------------------
+   ÉCRAN DE CONNEXION
+--------------------------------*/
+#ecranConnexion {
+  max-width: 420px;
+  margin: 60px auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  padding: 32px;
+  text-align: center;
+}
+
+#ecranConnexion h2 {
+  margin-top: 0;
+  font-size: 22px;
+  color: #222;
+}
+
+#ecranConnexion p {
+  color: #888;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+#ecranConnexion input[type="email"],
+#ecranConnexion input[type="password"] {
+  width: 100%;
+  padding: 12px 14px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+  box-sizing: border-box;
+  transition: 0.2s;
+}
+
+#ecranConnexion input:focus {
+  border-color: #4a6cf7;
+  outline: none;
+}
+
+#ecranConnexion button {
+  width: 100%;
+  margin: 6px 0;
+}
+
+#btnConnexion { background: #4a6cf7; }
+#btnConnexion:hover { background: #3a56d4; }
+
+#btnInscription { background: #2ecc71; }
+#btnInscription:hover { background: #27ae60; }
+
+#messageAuth {
+  margin-top: 12px;
+  font-size: 14px;
+  min-height: 20px;
+}
+
+/* ------------------------------
+   TABLEAU MODERNE
+--------------------------------*/
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+th {
+  background: #4a6cf7;
+  color: white;
+  padding: 12px;
+  font-size: 14px;
+  text-align: left;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+tr:nth-child(even) td {
+  background: #fafafa;
+}
+
+/* ------------------------------
+   CASE À COCHER
+--------------------------------*/
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #4a6cf7;
+  cursor: pointer;
+}
+
+/* ------------------------------
+   SELECT
+--------------------------------*/
+select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+select:hover {
+  border-color: #4a6cf7;
+}
+
+/* ------------------------------
+   INPUT TEXTE
+--------------------------------*/
+input[type="text"] {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+input[type="text"]:focus {
+  border-color: #4a6cf7;
+  outline: none;
+}
+
+/* ------------------------------
+   BOUTONS
+--------------------------------*/
+button {
+  background: #4a6cf7;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  margin: 10px 5px;
+  transition: 0.2s;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+button:hover { background: #3a56d4; }
+button:active { transform: scale(0.97); }
+button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+#supprimer { background: #e74c3c; }
+#supprimer:hover { background: #c0392b; }
+#exportCSV { background: #2ecc71; }
+#exportCSV:hover { background: #27ae60; }
+
+/* ------------------------------
+   RESPONSIVE
+--------------------------------*/
+@media (max-width: 700px) {
+  table, tr, td, th { display: block; }
+  tr {
+    margin-bottom: 15px;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  }
+  th { display: none; }
+  td { border: none; padding: 8px 0; }
+  td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #4a6cf7;
+    display: block;
+    margin-bottom: 4px;
+  }
+}
+    </style>
   </head>
 
   <body>
-    <h1>Journal de recharge</h1>
 
-    <table id="monTableau">
-      <tr>
-        <th>Témoin de suppression</th>
-        <th>Date & Heure</th>
-        <th>Type de recharge</th>
-        <th>Consommation (Wh)</th>
-        <th>Coûts (€)</th>
-        <th>Kilométrage (km)</th>
-        <th>Enregistré</th>
-      </tr>
-    </table>
+    <!-- =============================================
+         ÉCRAN DE CONNEXION / INSCRIPTION
+         (affiché tant que l'utilisateur n'est pas connecté)
+    ============================================= -->
+    <div id="ecranConnexion">
+      <h2>🔐 Connexion requise</h2>
+      <p>Connectez-vous pour accéder à votre journal de recharge.</p>
+      <input type="email" id="email" placeholder="Adresse e-mail" autocomplete="email">
+      <input type="password" id="password" placeholder="Mot de passe" autocomplete="current-password">
+      <button id="btnConnexion">Se connecter</button>
+      <button id="btnInscription">Créer un compte</button>
+      <div id="messageAuth"></div>
+    </div>
 
-    <button id="ajouter">Ajouter une ligne</button>
-    <button id="enregistrer">Enregistrer</button>
-    <button id="toggleCheck">Tout cocher / Tout décocher</button>
-    <button id="supprimer">Supprimer les lignes cochées</button>
-    <button id="exportCSV" style="background:#2ecc71;">Exporter en CSV</button>
+    <!-- =============================================
+         APPLICATION (affichée une fois connecté)
+    ============================================= -->
+    <div id="application" style="display:none;">
 
+      <div id="barreUtilisateur">
+        <span class="info">👤 <span id="emailUtilisateur"></span></span>
+        <button id="btnLogout">Déconnexion</button>
+      </div>
 
-    <!-- 📊 CANVAS DU GRAPHIQUE -->
-    <h2 style="text-align:center;margin-top:30px;">Évolution du kilométrage</h2>
-    <canvas id="graphKm" style="width:100%;max-width:900px;margin:auto;"></canvas>
+      <h1>Journal de recharge</h1>
 
-    <!-- Chart.js + adaptateur de dates (nécessaire pour l'échelle "time") -->
+      <table id="monTableau">
+        <tr>
+          <th>Témoin de suppression</th>
+          <th>Date & Heure</th>
+          <th>Type de recharge</th>
+          <th>Consommation (Wh)</th>
+          <th>Coûts (€)</th>
+          <th>Kilométrage (km)</th>
+          <th>Enregistré</th>
+        </tr>
+      </table>
+
+      <button id="ajouter">Ajouter une ligne</button>
+      <button id="enregistrer">Enregistrer</button>
+      <button id="toggleCheck">Tout cocher / Tout décocher</button>
+      <button id="supprimer">Supprimer les lignes cochées</button>
+      <button id="exportCSV">Exporter en CSV</button>
+
+      <h2>Évolution du kilométrage</h2>
+      <canvas id="graphKm" style="width:100%;max-width:900px;margin:auto;"></canvas>
+    </div>
+
+    <!-- =============================================
+         CHART.JS + ADAPTATEUR DE DATES
+    ============================================= -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
+    <!-- =============================================
+         FIREBASE — APP + DATABASE + AUTH (compat)
+    ============================================= -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBb67-ZsSRWFXxxzEqILmxo-ujhy2VfSyc",
-    authDomain: "recharges-tm3.firebaseapp.com",
-    databaseURL: "https://recharges-tm3-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "recharges-tm3",
-    storageBucket: "recharges-tm3.firebasestorage.app",
-    messagingSenderId: "1091245845968",
-    appId: "1:1091245845968:web:e1896209c398d5adf0ddd5"
-  };
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyBb67-ZsSRWFXxxzEqILmxo-ujhy2VfSyc",
+        authDomain: "recharges-tm3.firebaseapp.com",
+        databaseURL: "https://recharges-tm3-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "recharges-tm3",
+        storageBucket: "recharges-tm3.firebasestorage.app",
+        messagingSenderId: "1091245845968",
+        appId: "1:1091245845968:web:e1896209c398d5adf0ddd5"
+      };
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-</script>
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+      const auth = firebase.auth();
 
-    <script src="script.js"></script>
+      // Références UI
+      const ecranConnexion = document.getElementById("ecranConnexion");
+      const application     = document.getElementById("application");
+      const emailUtilisateur = document.getElementById("emailUtilisateur");
+      const champEmail      = document.getElementById("email");
+      const champPassword   = document.getElementById("password");
+      const btnConnexion    = document.getElementById("btnConnexion");
+      const btnInscription   = document.getElementById("btnInscription");
+      const btnLogout        = document.getElementById("btnLogout");
+      const messageAuth      = document.getElementById("messageAuth");
+
+      // Boutons d'écriture (à désactiver si non connecté)
+      const boutonsEcriture = [
+        document.getElementById("ajouter"),
+        document.getElementById("enregistrer"),
+        document.getElementById("supprimer"),
+        document.getElementById("toggleCheck")
+      ];
+
+      function afficherMessageAuth(texte, couleur) {
+        messageAuth.textContent = texte;
+        messageAuth.style.color = couleur || "#e74c3c";
+      }
+
+      // =============================================
+      //  AUTHENTIFICATION
+      // =============================================
+
+      btnConnexion.addEventListener("click", () => {
+        const email = champEmail.value.trim();
+        const pass  = champPassword.value;
+
+        if (!email || !pass) {
+          afficherMessageAuth("Veuillez saisir votre e-mail et mot de passe.");
+          return;
+        }
+
+        afficherMessageAuth("Connexion en cours...", "#888");
+
+        auth.signInWithEmailAndPassword(email, pass)
+          .catch(err => {
+            let msg = err.message || "Erreur de connexion.";
+            if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
+              msg = "E-mail ou mot de passe incorrect.";
+            }
+            afficherMessageAuth(msg);
+          });
+      });
+
+      btnInscription.addEventListener("click", () => {
+        const email = champEmail.value.trim();
+        const pass  = champPassword.value;
+
+        if (!email || !pass) {
+          afficherMessageAuth("Veuillez saisir un e-mail et un mot de passe pour créer un compte.");
+          return;
+        }
+        if (pass.length < 6) {
+          afficherMessageAuth("Le mot de passe doit contenir au moins 6 caractères.");
+          return;
+        }
+
+        afficherMessageAuth("Création du compte...", "#888");
+
+        auth.createUserWithEmailAndPassword(email, pass)
+          .catch(err => {
+            let msg = err.message || "Erreur lors de la création du compte.";
+            if (err.code === "auth/email-already-in-use") {
+              msg = "Cet e-mail est déjà utilisé. Essayez de vous connecter.";
+            }
+            afficherMessageAuth(msg);
+          });
+      });
+
+      btnLogout.addEventListener("click", () => {
+        auth.signOut();
+      });
+
+      // Détection de l'état de connexion
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          // Connecté
+          ecranConnexion.style.display = "none";
+          application.style.display    = "block";
+          emailUtilisateur.textContent = user.email;
+          boutonsEcriture.forEach(b => b.disabled = false);
+          champPassword.value = "";
+          afficherMessageAuth("");
+        } else {
+          // Déconnecté
+          ecranConnexion.style.display = "block";
+          application.style.display    = "none";
+          boutonsEcriture.forEach(b => b.disabled = true);
+        }
+      });
+    </script>
+
+    <!-- =============================================
+         SCRIPT PRINCIPAL (tableau + données)
+    ============================================= -->
+    <script>
+      const tableau = document.getElementById("monTableau");
+      const bouton = document.getElementById("ajouter");
+      const boutonEnregistrer = document.getElementById("enregistrer");
+      const boutonSupprimer = document.getElementById("supprimer");
+      const boutonToggleCheck = document.getElementById("toggleCheck");
+
+      function formatNombre(n) {
+        return Number(n).toLocaleString("fr-FR");
+      }
+
+      function nettoyerNombre(n) {
+        return n.replace(/\s/g, "");
+      }
+
+      function formatDecimal(n) {
+        return Number(n).toLocaleString("fr-FR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      function nettoyerDecimal(n) {
+        const valeur = n.replace(/\s/g, "").replace(",", ".");
+        const nombre = Number(valeur);
+        return isNaN(nombre) ? "0.00" : nombre.toFixed(2);
+      }
+
+      function formatDateAxe(timestamp) {
+        const d = new Date(timestamp);
+        const jour = String(d.getDate()).padStart(2, "0");
+        const mois = String(d.getMonth() + 1).padStart(2, "0");
+        const annee = String(d.getFullYear()).slice(-2);
+        const heures = String(d.getHours()).padStart(2, "0");
+        const minutes = String(d.getMinutes()).padStart(2, "0");
+        return `${jour}/${mois}/${annee} ${heures}:${minutes}`;
+      }
+
+      function convertirDateFRversISO(dateFR) {
+        const [date, heure] = dateFR.split(" ");
+        const [jour, mois, annee] = date.split("/");
+        return `${annee}-${mois}-${jour}T${heure}`;
+      }
+
+      function formatDateAffichage(dateISO) {
+        const d = new Date(dateISO);
+        return d.toLocaleDateString("fr-FR") + " " + d.toLocaleTimeString("fr-FR");
+      }
+
+      function verifierCoherenceKilometrage() {
+        const lignes = [];
+        for (let i = 1; i < tableau.rows.length; i++) {
+          const cells = tableau.rows[i].cells;
+          const dateISO = cells[1].dataset.iso;
+          const date = new Date(dateISO);
+          const km = Number(cells[5].textContent.replace(/\s/g, ""));
+          lignes.push({ index: i, date, km });
+        }
+        for (let i = 0; i < lignes.length; i++) {
+          const ligneA = lignes[i];
+          let incoherent = false;
+          for (let j = 0; j < lignes.length; j++) {
+            if (i === j) continue;
+            const ligneB = lignes[j];
+            if (ligneB.date < ligneA.date && ligneB.km > ligneA.km) {
+              incoherent = true;
+              break;
+            }
+          }
+          const row = tableau.rows[ligneA.index];
+          row.style.backgroundColor = incoherent ? "#ffdddd" : "";
+        }
+      }
+
+      let graphKm = null;
+
+      function mettreAJourGraphique() {
+        const points = [];
+        for (let i = 1; i < tableau.rows.length; i++) {
+          const cells = tableau.rows[i].cells;
+          const dateISO = cells[1].dataset.iso;
+          const km = Number(cells[5].textContent.replace(/\s/g, ""));
+          const timestamp = new Date(dateISO).getTime();
+          if (!isNaN(timestamp)) {
+            points.push({ x: timestamp, y: km });
+          }
+        }
+        points.sort((a, b) => a.x - b.x);
+
+        const ctx = document.getElementById("graphKm").getContext("2d");
+        if (graphKm) graphKm.destroy();
+
+        graphKm = new Chart(ctx, {
+          type: "line",
+          data: {
+            datasets: [{
+              label: "Kilométrage (km)",
+              data: points,
+              borderColor: "#4a6cf7",
+              backgroundColor: "rgba(74,108,247,0.15)",
+              borderWidth: 3,
+              tension: 0.3,
+              pointRadius: 4,
+              pointBackgroundColor: "#4a6cf7"
+            }]
+          },
+          options: {
+            responsive: true,
+            parsing: false,
+            scales: {
+              x: {
+                type: "time",
+                ticks: {
+                  callback: function (value) {
+                    return formatDateAxe(value);
+                  }
+                },
+                title: { display: true, text: "Date & Heure" }
+              },
+              y: { title: { display: true, text: "Kilométrage (km)" } }
+            },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  title: function (items) {
+                    return formatDateAxe(items[0].parsed.x);
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      db.ref("journal").on("value", snapshot => {
+        const lignes = snapshot.val();
+        while (tableau.rows.length > 1) {
+          tableau.deleteRow(1);
+        }
+        if (!lignes) {
+          mettreAJourGraphique();
+          return;
+        }
+        for (let ligne of lignes) {
+          const row = tableau.insertRow();
+
+          const c0 = row.insertCell();
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = ligne.checked === true;
+          c0.appendChild(checkbox);
+
+          const c1 = row.insertCell();
+          c1.textContent = formatDateAffichage(ligne.dateISO);
+          c1.dataset.iso = ligne.dateISO;
+          c1.contentEditable = true;
+
+          const c2 = row.insertCell();
+          const select = document.createElement("select");
+          const options = ["Maison", "Travail", "Borne public", "Supercharger", "Autre (texte libre)"];
+          for (let opt of options) {
+            const option = document.createElement("option");
+            option.value = opt;
+            option.textContent = opt;
+            select.appendChild(option);
+          }
+          const inputLibre = document.createElement("input");
+          inputLibre.type = "text";
+          inputLibre.placeholder = "Saisir un type...";
+          inputLibre.style.marginLeft = "10px";
+          if (!options.includes(ligne.type)) {
+            select.value = "Autre (texte libre)";
+            inputLibre.value = ligne.type;
+            inputLibre.style.display = "inline-block";
+          } else {
+            select.value = ligne.type;
+            inputLibre.style.display = "none";
+          }
+          select.addEventListener("change", () => {
+            if (select.value === "Autre (texte libre)") {
+              inputLibre.style.display = "inline-block";
+            } else {
+              inputLibre.style.display = "none";
+              inputLibre.value = "";
+            }
+          });
+          c2.appendChild(select);
+          c2.appendChild(inputLibre);
+
+          const c3 = row.insertCell();
+          c3.textContent = formatNombre(ligne.conso);
+          c3.contentEditable = true;
+
+          const cCout = row.insertCell();
+          cCout.textContent = formatDecimal(ligne.cout || 0);
+          cCout.contentEditable = true;
+
+          const c4 = row.insertCell();
+          c4.textContent = formatNombre(ligne.km);
+          c4.contentEditable = true;
+
+          const c5 = row.insertCell();
+          const selectFlag = document.createElement("select");
+          const opt1 = document.createElement("option");
+          opt1.value = "❌";
+          opt1.textContent = "❌";
+          const opt2 = document.createElement("option");
+          opt2.value = "✔️";
+          opt2.textContent = "✔️";
+          selectFlag.appendChild(opt1);
+          selectFlag.appendChild(opt2);
+          selectFlag.value = ligne.flag || "❌";
+          c5.appendChild(selectFlag);
+        }
+        verifierCoherenceKilometrage();
+        mettreAJourGraphique();
+      });
+
+      function ajouterLigne() {
+        const maintenantISO = new Date().toISOString();
+        const nouvelleLigne = {
+          checked: false,
+          dateISO: maintenantISO,
+          type: "Maison",
+          conso: "0",
+          cout: "0.00",
+          km: "0",
+          flag: "❌"
+        };
+        db.ref("journal").once("value", snapshot => {
+          const data = snapshot.val() || [];
+          data.push(nouvelleLigne);
+          db.ref("journal").set(data);
+        });
+      }
+      bouton.addEventListener("click", ajouterLigne);
+
+      boutonEnregistrer.addEventListener("click", () => {
+        let lignes = [];
+        for (let i = 1; i < tableau.rows.length; i++) {
+          const cells = tableau.rows[i].cells;
+          const checkbox = cells[0].querySelector("input");
+          const dateFR = cells[1].textContent.trim();
+          const dateISO = convertirDateFRversISO(dateFR);
+          const select = cells[2].querySelector("select");
+          const inputLibre = cells[2].querySelector("input");
+          let typeRecharge = select.value;
+          if (select.value === "Autre (texte libre)" && inputLibre.value.trim() !== "") {
+            typeRecharge = inputLibre.value.trim();
+          }
+          const selectFlag = cells[6].querySelector("select");
+          lignes.push({
+            checked: checkbox.checked,
+            dateISO: dateISO,
+            type: typeRecharge,
+            conso: nettoyerNombre(cells[3].textContent),
+            cout: nettoyerDecimal(cells[4].textContent),
+            km: nettoyerNombre(cells[5].textContent),
+            flag: selectFlag.value
+          });
+        }
+        lignes.sort((a, b) => new Date(a.dateISO) - new Date(b.dateISO));
+        db.ref("journal").set(lignes);
+        verifierCoherenceKilometrage();
+        mettreAJourGraphique();
+        alert("Données enregistrées dans le cloud !");
+      });
+
+      boutonSupprimer.addEventListener("click", () => {
+        const confirmation = confirm("Supprimer les lignes cochées ?\n\nRépondre : Oui / Non");
+        if (!confirmation) {
+          alert("Suppression annulée.");
+          return;
+        }
+        db.ref("journal").once("value", snapshot => {
+          const data = snapshot.val() || [];
+          const lignesCochees = [];
+          for (let i = 1; i < tableau.rows.length; i++) {
+            const checkbox = tableau.rows[i].cells[0].querySelector("input");
+            if (checkbox.checked) {
+              lignesCochees.push(i - 1);
+            }
+          }
+          const nouvellesDonnees = data.filter((ligne, index) => !lignesCochees.includes(index));
+          db.ref("journal").set(nouvellesDonnees);
+          alert("Lignes supprimées !");
+        });
+      });
+
+      boutonToggleCheck.addEventListener("click", () => {
+        let auMoinsUneDecochee = false;
+        for (let i = 1; i < tableau.rows.length; i++) {
+          const checkbox = tableau.rows[i].cells[0].querySelector("input");
+          if (!checkbox.checked) {
+            auMoinsUneDecochee = true;
+            break;
+          }
+        }
+        for (let i = 1; i < tableau.rows.length; i++) {
+          const checkbox = tableau.rows[i].cells[0].querySelector("input");
+          checkbox.checked = auMoinsUneDecochee;
+        }
+        boutonToggleCheck.textContent = auMoinsUneDecochee ? "Tout décocher" : "Tout cocher";
+      });
+
+      document.getElementById("exportCSV").addEventListener("click", () => {
+        let lignesCSV = [];
+        lignesCSV.push(["checked","dateISO","type","conso","cout","km","flag"].join(";"));
+        for (let i = 1; i < tableau.rows.length; i++) {
+          const cells = tableau.rows[i].cells;
+          const checked = cells[0].querySelector("input").checked ? "1" : "0";
+          const dateFR = cells[1].textContent.trim();
+          const dateISO = convertirDateFRversISO(dateFR);
+          const select = cells[2].querySelector("select");
+          const inputLibre = cells[2].querySelector("input");
+          let typeRecharge = select.value;
+          if (select.value === "Autre (texte libre)" && inputLibre.value.trim() !== "") {
+            typeRecharge = inputLibre.value.trim();
+          }
+          const conso = nettoyerNombre(cells[3].textContent);
+          const cout = nettoyerDecimal(cells[4].textContent);
+          const km = nettoyerNombre(cells[5].textContent);
+          const flag = cells[6].querySelector("select").value;
+          lignesCSV.push([checked, dateISO, typeRecharge, conso, cout, km, flag].join(";"));
+        }
+        const contenu = lignesCSV.join("\n");
+        const blob = new Blob([contenu], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "journal.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    </script>
   </body>
 </html>
