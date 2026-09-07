@@ -253,7 +253,8 @@ button:disabled {
     ============================================= -->
     <div id="ecranConnexion">
       <h2>🔐 Connexion requise</h2>
-      <p>Connectez-vous pour accéder à votre journal de recharge.</p>
+      <p>Connectez-vous pour accéder à votre journal de recharge.<br>
+      <small style="color:#aaa;">La création de compte est réservée au propriétaire.</small></p>
       <input type="email" id="email" placeholder="Adresse e-mail" autocomplete="email">
       <input type="password" id="password" placeholder="Mot de passe" autocomplete="current-password">
       <button id="btnConnexion">Se connecter</button>
@@ -373,8 +374,11 @@ button:disabled {
           });
       });
 
+      // Liste blanche : seules ces adresses peuvent créer un compte
+      const emailsAutorises = ["nicolasdurier@hotmail.fr"];
+
       btnInscription.addEventListener("click", () => {
-        const email = champEmail.value.trim();
+        const email = champEmail.value.trim().toLowerCase();
         const pass  = champPassword.value;
 
         if (!email || !pass) {
@@ -383,6 +387,11 @@ button:disabled {
         }
         if (pass.length < 6) {
           afficherMessageAuth("Le mot de passe doit contenir au moins 6 caractères.");
+          return;
+        }
+        // Validation : seul le propriétaire peut créer un compte
+        if (!emailsAutorises.includes(email)) {
+          afficherMessageAuth("La création de compte est réservée au propriétaire de l'application. Contactez l'administrateur.");
           return;
         }
 
