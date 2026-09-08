@@ -279,6 +279,7 @@ button:disabled {
           <th>Témoin de suppression</th>
           <th>Date & Heure</th>
           <th>Type de recharge</th>
+          <th>Durée de la charge</th>
           <th>Consommation (Wh)</th>
           <th>Coûts (€)</th>
           <th>Kilométrage (km)</th>
@@ -290,6 +291,7 @@ button:disabled {
       <button id="enregistrer">Enregistrer</button>
       <button id="toggleCheck">Tout cocher / Tout décocher</button>
       <button id="supprimer">Supprimer les lignes cochées</button>
+      <button id="inverserValidation">Inverser la validation des lignes cochées</button>
       <button id="exportCSV">Exporter en CSV</button>
 
       <h2>Évolution du kilométrage</h2>
@@ -461,6 +463,45 @@ button:disabled {
         return isNaN(nombre) ? "0.00" : nombre.toFixed(2);
       }
 
+      // Formatage durée hh:mm:ss
+      function formatDuree(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+      }
+
+      // Conversion hh:mm:ss vers secondes
+      function dureeVersSecondes(dureeStr) {
+        const parts = dureeStr.split(":");
+        let h = 0, m = 0, s = 0;
+        if (parts.length === 3) {
+          h = Number(parts[0]) || 0;
+          m = Number(parts[1]) || 0;
+          s = Number(parts[2]) || 0;
+        } else if (parts.length === 2) {
+          m = Number(parts[0]) || 0;
+          s = Number(parts[1]) || 0;
+        }
+        return h * 3600 + m * 60 + s;
+      }
+
+      // Nettoyage d'une durée saisie (hh:mm:ss)
+      function nettoyerDuree(dureeStr) {
+        const parts = dureeStr.split(":");
+        let h = 0, m = 0, s = 0;
+        if (parts.length === 3) {
+          h = Math.max(0, Math.min(23, Number(parts[0]) || 0));
+          m = Math.max(0, Math.min(59, Number(parts[1]) || 0));
+          s = Math.max(0, Math.min(59, Number(parts[2]) || 0));
+        } else if (parts.length === 2) {
+          h = 0;
+          m = Math.max(0, Math.min(59, Number(parts[0]) || 0));
+          s = Math.max(0, Math.min(59, Number(parts[1]) || 0));
+        }
+        return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+      }
+
       function formatDateAxe(timestamp) {
         const d = new Date(timestamp);
         const jour = String(d.getDate()).padStart(2, "0");
@@ -622,19 +663,28 @@ button:disabled {
           c2.appendChild(select);
           c2.appendChild(inputLibre);
 
+          // Colonne 4 : Durée de la charge (nouvelle colonne)
           const c3 = row.insertCell();
-          c3.textContent = formatNombre(ligne.conso);
+          c3.textContent = formatDuree(ligne.duree ? dureeVersSecondes(ligne.duree) : 0);
           c3.contentEditable = true;
 
+          // Colonne 5 : Consommation (décalée)
+          const c4 = row.insertCell();
+          c4.textContent = formatNombre(ligne.conso);
+          c4.contentEditable = true;
+
+          // Colonne 6 : Coûts (décalée)
           const cCout = row.insertCell();
           cCout.textContent = formatDecimal(ligne.cout || 0);
           cCout.contentEditable = true;
 
-          const c4 = row.insertCell();
-          c4.textContent = formatNombre(ligne.km);
-          c4.contentEditable = true;
-
+          // Colonne 7 : Kilométrage (décalée)
           const c5 = row.insertCell();
+          c5.textContent = formatNombre(ligne.km);
+          c5.contentEditable = true;
+
+          // Colonne 8 : Enregistré (décalée)
+          const c6 = row.insertCell();
           const selectFlag = document.createElement("select");
           const opt1 = document.createElement("option");
           opt1.value = "❌";
@@ -657,6 +707,7 @@ button:disabled {
           checked: false,
           dateISO: maintenantISO,
           type: "Maison",
+          duree: "00:00:00",
           conso: "0",
           cout: "0.00",
           km: "0",
@@ -683,14 +734,16 @@ button:disabled {
           if (select.value === "Autre (texte libre)" && inputLibre.value.trim() !== "") {
             typeRecharge = inputLibre.value.trim();
           }
-          const selectFlag = cells[6].querySelector("select");
+          const duree = nettoyerDuree(cells[3].textContent);
+          const selectFlag = cells[7].querySelector("select");
           lignes.push({
             checked: checkbox.checked,
             dateISO: dateISO,
             type: typeRecharge,
-            conso: nettoyerNombre(cells[3].textContent),
-            cout: nettoyerDecimal(cells[4].textContent),
-            km: nettoyerNombre(cells[5].textContent),
+            duree: duree,
+            conso: nettoyerNombre(cells[4].textContent),
+            cout: nettoyerDecimal(cells[5].textContent),
+            km: nettoyerNombre(cells[6].textContent),
             flag: selectFlag.value
           });
         }
@@ -738,9 +791,37 @@ button:disabled {
         boutonToggleCheck.textContent = auMoinsUneDecochee ? "Tout décocher" : "Tout cocher";
       });
 
+      // Inverser la validation des lignes cochées
+      document.getElementById("inverserValidation").addEventListener("click", () => {
+        const lignesAInverser = [];
+        for (let i = 1; i < tableau.rows.length; i++) {
+          const checkbox = tableau.rows[i].cells[0].querySelector("input");
+          if (checkbox.checked) {
+            const selectFlag = tableau.rows[i].cells[7].querySelector("select");
+            const nouvelleValeur = selectFlag.value === "✔️" ? "❌" : "✔️";
+            selectFlag.value = nouvelleValeur;
+            lignesAInverser.push(i - 1);
+          }
+        }
+        if (lignesAInverser.length > 0) {
+          db.ref("journal").once("value", snapshot => {
+            const data = snapshot.val() || [];
+            for (const index of lignesAInverser) {
+              if (data[index]) {
+                data[index].flag = data[index].flag === "✔️" ? "❌" : "✔️";
+              }
+            }
+            db.ref("journal").set(data);
+          });
+          alert("Validation inversée pour les lignes cochées !");
+        } else {
+          alert("Aucune ligne n'est cochée.");
+        }
+      });
+
       document.getElementById("exportCSV").addEventListener("click", () => {
         let lignesCSV = [];
-        lignesCSV.push(["checked","dateISO","type","conso","cout","km","flag"].join(";"));
+        lignesCSV.push(["checked","dateISO","type","duree","conso","cout","km","flag"].join(";"));
         for (let i = 1; i < tableau.rows.length; i++) {
           const cells = tableau.rows[i].cells;
           const checked = cells[0].querySelector("input").checked ? "1" : "0";
@@ -752,11 +833,12 @@ button:disabled {
           if (select.value === "Autre (texte libre)" && inputLibre.value.trim() !== "") {
             typeRecharge = inputLibre.value.trim();
           }
-          const conso = nettoyerNombre(cells[3].textContent);
-          const cout = nettoyerDecimal(cells[4].textContent);
-          const km = nettoyerNombre(cells[5].textContent);
-          const flag = cells[6].querySelector("select").value;
-          lignesCSV.push([checked, dateISO, typeRecharge, conso, cout, km, flag].join(";"));
+          const duree = nettoyerDuree(cells[3].textContent);
+          const conso = nettoyerNombre(cells[4].textContent);
+          const cout = nettoyerDecimal(cells[5].textContent);
+          const km = nettoyerNombre(cells[6].textContent);
+          const flag = cells[7].querySelector("select").value;
+          lignesCSV.push([checked, dateISO, typeRecharge, duree, conso, cout, km, flag].join(";"));
         }
         const contenu = lignesCSV.join("\n");
         const blob = new Blob([contenu], { type: "text/csv;charset=utf-8;" });
