@@ -158,8 +158,7 @@ td {
   padding: 10px;
   border-bottom: 1px solid #eee;
   font-size: 14px;
-  white-space: normal;
-  word-break: break-word;
+  white-space: nowrap;
 }
 
 tr:nth-child(even) td {
@@ -297,7 +296,7 @@ button:disabled {
 
       <table id="monTableau">
         <tr>
-          <th>Témoin de suppression</th>
+          <th>Témoin</th>
           <th>Date & Heure</th>
           <th>Type de recharge</th>
           <th>Durée de la charge</th>
@@ -551,7 +550,7 @@ button:disabled {
           const cells = tableau.rows[i].cells;
           const dateISO = cells[1].dataset.iso;
           const date = new Date(dateISO);
-          const km = Number(cells[5].textContent.replace(/\s/g, ""));
+          const km = Number(cells[6].textContent.replace(/\s/g, ""));
           lignes.push({ index: i, date, km });
         }
         for (let i = 0; i < lignes.length; i++) {
@@ -577,7 +576,7 @@ button:disabled {
         for (let i = 1; i < tableau.rows.length; i++) {
           const cells = tableau.rows[i].cells;
           const dateISO = cells[1].dataset.iso;
-          const km = Number(cells[5].textContent.replace(/\s/g, ""));
+          const km = Number(cells[6].textContent.replace(/\s/g, ""));
           const timestamp = new Date(dateISO).getTime();
           if (!isNaN(timestamp)) {
             points.push({ x: timestamp, y: km });
@@ -717,7 +716,7 @@ button:disabled {
           selectFlag.appendChild(opt1);
           selectFlag.appendChild(opt2);
           selectFlag.value = ligne.flag || "❌";
-          c5.appendChild(selectFlag);
+          c6.appendChild(selectFlag);
         }
         verifierCoherenceKilometrage();
         mettreAJourGraphique();
@@ -814,11 +813,11 @@ button:disabled {
       });
 
       // Inverser la validation des lignes cochées
-      // Inverser la validation des lignes cochées
       document.getElementById("validerAnnuler").addEventListener("click", () => {
         const lignesAInverser = [];
         for (let i = 1; i < tableau.rows.length; i++) {
-          const checkbox = tableau.rows[i].cells[0].querySelector("input");
+          const cell = tableau.rows[i].cells[0];
+          const checkbox = cell.querySelector("input[type=checkbox]");
           if (checkbox && checkbox.checked) {
             const selectFlag = tableau.rows[i].cells[7].querySelector("select");
             if (selectFlag) {
