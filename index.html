@@ -135,6 +135,13 @@ th {
   padding: 12px;
   font-size: 14px;
   text-align: left;
+  white-space: normal;
+  word-break: break-word;
+}
+
+th:first-child, td:first-child {
+  width: 60px;
+  min-width: 60px;
 }
 
 td {
@@ -217,6 +224,8 @@ button:disabled {
 
 #supprimer { background: #e74c3c; }
 #supprimer:hover { background: #c0392b; }
+#validerAnnuler { background: #f39c12; }
+#validerAnnuler:hover { background: #e67e22; }
 #exportCSV { background: #2ecc71; }
 #exportCSV:hover { background: #27ae60; }
 
@@ -291,7 +300,7 @@ button:disabled {
       <button id="enregistrer">Enregistrer</button>
       <button id="toggleCheck">Tout cocher / Tout décocher</button>
       <button id="supprimer">Supprimer les lignes cochées</button>
-      <button id="inverserValidation">Inverser la validation des lignes cochées</button>
+      <button id="validerAnnuler">Valider / Annuler</button>
       <button id="exportCSV">Exporter en CSV</button>
 
       <h2>Évolution du kilométrage</h2>
@@ -343,7 +352,8 @@ button:disabled {
         document.getElementById("ajouter"),
         document.getElementById("enregistrer"),
         document.getElementById("supprimer"),
-        document.getElementById("toggleCheck")
+        document.getElementById("toggleCheck"),
+        document.getElementById("validerAnnuler")
       ];
 
       function afficherMessageAuth(texte, couleur) {
@@ -792,7 +802,8 @@ button:disabled {
       });
 
       // Inverser la validation des lignes cochées
-      document.getElementById("inverserValidation").addEventListener("click", () => {
+      // Inverser la validation des lignes cochées
+      document.getElementById("validerAnnuler").addEventListener("click", () => {
         const lignesAInverser = [];
         for (let i = 1; i < tableau.rows.length; i++) {
           const checkbox = tableau.rows[i].cells[0].querySelector("input");
