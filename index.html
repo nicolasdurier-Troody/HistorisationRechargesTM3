@@ -140,14 +140,26 @@ th {
 }
 
 th:first-child, td:first-child {
-  width: 60px;
-  min-width: 60px;
+  width: 75px;
+  min-width: 75px;
+}
+
+th:nth-child(7), td:nth-child(7) {
+  width: 80px;
+  min-width: 80px;
+}
+
+th:nth-child(8), td:nth-child(8) {
+  width: 80px;
+  min-width: 80px;
 }
 
 td {
   padding: 10px;
   border-bottom: 1px solid #eee;
   font-size: 14px;
+  white-space: normal;
+  word-break: break-word;
 }
 
 tr:nth-child(even) td {
@@ -224,7 +236,7 @@ button:disabled {
 
 #supprimer { background: #e74c3c; }
 #supprimer:hover { background: #c0392b; }
-#validerAnnuler { background: #f39c12; }
+#validerAnnuler { background: #f39c12; cursor: pointer; }
 #validerAnnuler:hover { background: #e67e22; }
 #exportCSV { background: #2ecc71; }
 #exportCSV:hover { background: #27ae60; }
@@ -807,11 +819,13 @@ button:disabled {
         const lignesAInverser = [];
         for (let i = 1; i < tableau.rows.length; i++) {
           const checkbox = tableau.rows[i].cells[0].querySelector("input");
-          if (checkbox.checked) {
+          if (checkbox && checkbox.checked) {
             const selectFlag = tableau.rows[i].cells[7].querySelector("select");
-            const nouvelleValeur = selectFlag.value === "✔️" ? "❌" : "✔️";
-            selectFlag.value = nouvelleValeur;
-            lignesAInverser.push(i - 1);
+            if (selectFlag) {
+              const nouvelleValeur = selectFlag.value === "✔️" ? "❌" : "✔️";
+              selectFlag.value = nouvelleValeur;
+              lignesAInverser.push(i - 1);
+            }
           }
         }
         if (lignesAInverser.length > 0) {
@@ -826,7 +840,7 @@ button:disabled {
           });
           alert("Validation inversée pour les lignes cochées !");
         } else {
-          alert("Aucune ligne n'est cochée.");
+          alert("Aucune ligne n'est cochée.\nCochez d'abord les lignes à modifier.");
         }
       });
 
